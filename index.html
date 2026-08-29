@@ -1,0 +1,229 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>コントラバス図鑑 — 持ち主が語る、一本ずつ。</title>
+<meta name="description" content="個人所有のコントラバスを、持ち主の言葉と一緒に一本ずつ並べる図鑑。製作者・年代・バックの形・弦長・張っている弦まで、写真だけでは分からないところを揃えて比べられるようにしています。">
+<meta property="og:title" content="コントラバス図鑑">
+<meta property="og:description" content="個人所有のコントラバスを、持ち主の言葉と一緒に一本ずつ。">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://bassdex.github.io/">
+<!-- SNSは相対パスを拾えないので絶対URL。独自ドメインに移したらここも変える -->
+<meta property="og:image" content="https://bassdex.github.io/images/udon-now-01-full.jpg">
+<meta name="twitter:card" content="summary_large_image">
+
+<style>
+:root{
+  --body:system-ui,-apple-system,"Hiragino Sans","Noto Sans JP","Helvetica Neue",sans-serif;
+  --serif:"Hiragino Mincho ProN","Yu Mincho",YuMincho,"Noto Serif JP",serif;
+  --paper:#F7F4EF; --card:#FFFFFF; --ink:#1A1815;
+  --muted:#8A8073; --line:#E4DDD2; --accent:#8C4A22; --sample:#B08900;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{
+  background:var(--paper); color:var(--ink); font-family:var(--body);
+  line-height:1.75; letter-spacing:.01em;
+}
+.wrap{max-width:660px;margin:0 auto;padding:0 20px 80px}
+a{color:var(--accent)}
+
+/* 表題。楽器が主役なので、名乗りは静かに置く */
+header{padding:clamp(52px,11vw,88px) 0 0;text-align:center}
+header h1{font-family:var(--serif);font-weight:600;font-size:clamp(28px,7.4vw,40px);letter-spacing:.06em;line-height:1.3}
+header .sub{margin-top:12px;font-size:14px;color:var(--muted);letter-spacing:.04em}
+header .lead{margin:26px auto 0;max-width:30em;font-size:14px;color:var(--muted);text-align:left;line-height:1.85}
+
+h2{
+  font-family:var(--serif);font-weight:600;font-size:15px;letter-spacing:.2em;
+  color:var(--muted);margin:56px 0 16px;padding-bottom:9px;border-bottom:1px solid var(--line);
+}
+.count{float:right;font-family:var(--body);font-size:12px;letter-spacing:.06em}
+
+/* 1本分のカード */
+.bass{background:var(--card);border:1px solid var(--line);border-radius:10px;overflow:hidden}
+.bass + .bass{margin-top:20px}
+
+/* 写真。指で送れて、点で枚数を示す。ライブラリは使わない */
+.shots{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;scrollbar-width:none;background:#EFE9E0}
+.shots::-webkit-scrollbar{display:none}
+.shots figure{flex:0 0 100%;scroll-snap-align:center}
+/* 縦横比は写真ごとにばらつく（全身は3:4、寄りはもっと縦長）。
+   cover で切ると楽器の端が落ちるので contain で letterbox させる */
+.shots img{display:block;width:100%;aspect-ratio:3/4;object-fit:contain;background:#EFE9E0}
+.dots{display:flex;justify-content:center;gap:6px;padding:9px 0 0}
+.dots i{width:5px;height:5px;border-radius:50%;background:var(--line)}
+.dots i.on{background:var(--accent)}
+/* 写真がまだ無いとき。空欄を隠さず「待ち」と言うほうが正直 */
+/* 写真待ちの枠は低くしておく。中身のない箱が本物の写真と同じ面積を占めると、
+   埋まっていないページがよけいに寂しく見える */
+.empty{height:96px;display:flex;align-items:center;justify-content:center;
+  background:#EFE9E0;border-bottom:1px solid var(--line);color:var(--muted);font-size:13px;letter-spacing:.08em}
+
+.body{padding:22px}
+.badge{display:inline-block;font-size:11px;letter-spacing:.12em;padding:3px 9px;border-radius:3px;border:1px solid var(--line);color:var(--muted)}
+.badge.now{border-color:var(--accent);color:var(--accent)}
+.badge.sample{border-color:var(--sample);color:var(--sample)}
+.bass h3{margin-top:11px;font-family:var(--serif);font-weight:600;font-size:21px;line-height:1.4}
+.bass .who{margin-top:4px;font-size:13px;color:var(--muted)}
+
+/* 持ち主の一言。ここが主役なので、スペックより先に・大きく置く */
+.note{margin-top:16px;font-size:15px;line-height:1.85;white-space:pre-line}
+
+/* スペック。インスタで比べられない部分がこれ */
+.spec{margin-top:20px;padding-top:17px;border-top:1px solid var(--line);
+  display:grid;grid-template-columns:6.5em 1fr;gap:7px 16px;font-size:13.5px}
+.spec dt{color:var(--muted)}
+
+/* 投稿の案内 */
+.call{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:24px}
+.call p{font-size:14px;line-height:1.85}
+.call ul{margin:14px 0 0;padding-left:1.15em;font-size:13.5px;color:var(--muted);line-height:1.9}
+.btn{display:block;margin-top:20px;padding:14px;text-align:center;background:var(--accent);
+  color:#fff;text-decoration:none;border-radius:6px;font-size:15px;letter-spacing:.04em}
+.btn.off{background:#CFC6B8;pointer-events:none}
+
+footer{margin-top:40px;font-size:12px;color:var(--muted);line-height:1.9;text-align:center}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <h1>コントラバス図鑑</h1>
+  <div class="sub">持ち主が語る、一本ずつ。</div>
+  <p class="lead">
+    楽器屋の在庫写真ではなく、いま誰かが弾いている個人の楽器を並べています。
+    製作者、年代、バックの形、弦長、張っている弦。
+    写真を眺めるだけでは分からないところまで書いてあるので、横に並べて比べられます。
+  </p>
+</header>
+
+<h2>収録<span class="count" id="count"></span></h2>
+<div id="list"></div>
+
+<h2>あなたの一本を載せませんか</h2>
+<div class="call">
+  <p>個人所有の楽器なら、年代も来歴も分からなくて構いません。写真と、その楽器についてのひとことがあれば載せられます。手放した楽器も歓迎です。</p>
+  <ul>
+    <li>写真は自分で撮ったものだけ（楽器屋やメーカーのサイトの写真は使えません）</li>
+    <li>保管場所が分かる背景は避けてください（高価な楽器なので、これだけはお願いします）</li>
+    <li>名前は呼び名・ハンドルネームで構いません</li>
+  </ul>
+  <!-- Googleフォームを作ったら href を差し替えて class の off を外す -->
+  <a class="btn off" href="#">投稿フォーム（準備中）</a>
+</div>
+
+<footer>
+  写真と文章の権利は各投稿者にあります。<br>
+  掲載の取り下げはいつでも受け付けます。
+</footer>
+
+</div>
+
+<script>
+/* ============================================================
+   ここから下だけ編集する。1本＝1オブジェクト。
+   使わない項目は行ごと省いてよい（空欄は表に出ない）。
+   ============================================================ */
+const BASSES = [
+
+  {
+    status:"now",
+    name:"Andrew Collins",
+    owner:"Udon",
+    maker:"Andrew Collins（監修）／チェコの工房製",
+    origin:"チェコ",
+    year:"1990年代後半〜2000年代前半（推定）",
+    back:"フラットバック",
+    scale:"103.5cm",
+    topLength:"112cm",
+    upperWidth:"50cm",
+    lowerWidth:"65cm",
+    photos:[
+      "images/udon-now-01-full.jpg",
+      "images/udon-now-01-front.jpg",
+      "images/udon-now-01-back.jpg"
+    ],
+    note:"Andrew Collins が監修し、チェコの工房で作られた一本。Collins はイギリスの老舗鑑定楽器店 Hill & Son に長年勤めていて、そこで蓄えた名器のデータをもとにチェコで作らせているのだという。製作は20〜30年ほど前と思われる。"
+  },
+
+  {
+    status:"past",
+    name:"Anton Holzlechner",
+    owner:"Udon",
+    maker:"Anton Holzlechner",
+    origin:"ドイツ",
+    year:"2009年",
+    back:"ラウンドバック",
+    scale:"102.5cm",
+    topLength:"106.5cm",
+    upperWidth:"49cm",
+    lowerWidth:"65cm",
+    ribs:"22cm",
+    photos:[
+      "images/udon-past-01-full.jpg",
+      "images/udon-past-01-front.jpg",
+      "images/udon-past-01-back.jpg"
+    ],
+    note:""
+  },
+
+];
+/* ============================================================
+   ここから下は触らなくてよい
+   ============================================================ */
+
+const SPEC = [
+  ["maker","製作"], ["origin","製作国"], ["year","年代"], ["size","サイズ"],
+  ["back","バック"], ["scale","弦長"],
+  ["topLength","表板長"], ["upperWidth","肩幅"], ["lowerWidth","下部幅"], ["ribs","横板幅"],
+  ["strings","弦"], ["pickup","ピックアップ"],
+  ["genre","主な用途"], ["owned","所有期間"],
+];
+const esc = s => String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+
+document.getElementById("count").textContent = BASSES.length + " 本";
+
+document.getElementById("list").innerHTML = BASSES.map((b, i) => {
+  const photos = b.photos || [];
+  const shots = photos.length
+    ? `<div class="shots" data-c="${photos.length}">` +
+      photos.map(p => `<figure><img src="${esc(p)}" alt="${esc(b.name)}" loading="lazy"></figure>`).join("") +
+      `</div>` + (photos.length > 1
+        ? `<div class="dots">` + photos.map((_, j) => `<i class="${j ? "" : "on"}"></i>`).join("") + `</div>`
+        : "")
+    : `<div class="empty">写真待ち</div>`;
+
+  const spec = SPEC.filter(([k]) => b[k]).map(([k, label]) =>
+    `<dt>${label}</dt><dd>${esc(b[k])}</dd>`).join("");
+
+  const badge = b.sample
+    ? `<span class="badge sample">見本</span>`
+    : `<span class="badge ${b.status === "now" ? "now" : ""}">${b.status === "now" ? "いま使っている" : "手放した"}</span>`;
+
+  return `<article class="bass" id="b${i + 1}">
+    ${shots}
+    <div class="body">
+      ${badge}
+      <h3>${esc(b.name || "無題")}</h3>
+      <div class="who">${esc(b.owner || "")}</div>
+      ${b.note ? `<p class="note">${esc(b.note)}</p>` : ""}
+      ${spec ? `<dl class="spec">${spec}</dl>` : ""}
+    </div>
+  </article>`;
+}).join("");
+
+/* 何枚目を見ているかを点に反映する */
+document.querySelectorAll(".shots").forEach(el => {
+  const dots = el.nextElementSibling;
+  if (!dots || !dots.classList.contains("dots")) return;
+  el.addEventListener("scroll", () => {
+    const n = Math.round(el.scrollLeft / el.clientWidth);
+    dots.querySelectorAll("i").forEach((d, j) => d.classList.toggle("on", j === n));
+  }, { passive:true });
+});
+</script>
+</body>
+</html>
