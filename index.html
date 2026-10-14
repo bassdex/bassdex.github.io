@@ -84,6 +84,35 @@ h2{
   color:#fff;text-decoration:none;border-radius:6px;font-size:15px;letter-spacing:.04em}
 .btn.off{background:#CFC6B8;pointer-events:none}
 
+/* 棚の切り替え。上で「どちらの棚か」だけ示す */
+.shelves{display:flex;justify-content:center;gap:10px;margin-top:28px}
+.shelves a{font-size:13px;letter-spacing:.06em;padding:6px 14px;border:1px solid var(--line);border-radius:999px;text-decoration:none;color:var(--muted);background:var(--card)}
+
+/* 名手の楽器。写真の代わりに動画の埋め込み、持ち主のひとことの代わりに出典と確度が主役 */
+.shelf-lead{font-size:13.5px;color:var(--muted);line-height:1.85;margin-bottom:18px}
+.group{margin:30px 0 12px;font-size:13px;letter-spacing:.14em;color:var(--muted)}
+.player{background:var(--card);border:1px solid var(--line);border-radius:10px;overflow:hidden}
+.player + .player{margin-top:14px}
+.player .video{position:relative;aspect-ratio:16/9;background:#111}
+.player .video iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
+.player .body{padding:18px 22px}
+.player h3{font-family:var(--serif);font-weight:600;font-size:19px;line-height:1.4;margin-top:9px}
+.player .inst{margin-top:8px;font-size:14.5px;line-height:1.8}
+.player .inst.unknown{color:var(--muted)}
+.player .src{margin-top:12px;font-size:12px;color:var(--muted);line-height:1.8}
+.player .src a{margin-right:10px}
+.badge.sure{border-color:#2F6B3A;color:#2F6B3A}
+.badge.maybe{border-color:var(--sample);color:var(--sample)}
+.badge.video{border-color:#3A5A8C;color:#3A5A8C}
+.player .more{margin-top:14px}
+.player .ja{margin-top:16px;padding:14px 16px;background:var(--paper);border-radius:8px}
+.player .ja-h{font-size:11.5px;letter-spacing:.12em;color:var(--muted);margin-bottom:6px}
+.player .ja p{font-size:13.5px;line-height:1.85}
+.player .ja p + p{margin-top:10px}
+.player .ja .by{display:block;margin-top:2px;font-size:11.5px;color:var(--muted)}
+.player .vnote{padding:8px 22px 0;font-size:12px;color:var(--muted);line-height:1.7}
+.player .vnote .tag{display:inline-block;margin-right:6px;font-size:10.5px;letter-spacing:.1em;padding:1px 6px;border:1px solid var(--line);border-radius:3px}
+
 footer{margin-top:40px;font-size:12px;color:var(--muted);line-height:1.9;text-align:center}
 </style>
 </head>
@@ -98,10 +127,18 @@ footer{margin-top:40px;font-size:12px;color:var(--muted);line-height:1.9;text-al
     製作者、年代、バックの形、弦長、張っている弦。
     写真を眺めるだけでは分からないところまで書いてあるので、横に並べて比べられます。
   </p>
+  <nav class="shelves"><a href="#owners">持ち主の楽器</a><a href="#masters">名手の楽器</a></nav>
 </header>
 
-<h2>収録<span class="count" id="count"></span></h2>
+<h2 id="owners">収録<span class="count" id="count"></span></h2>
 <div id="list"></div>
+
+<h2 id="masters">名手の楽器<span class="count" id="pcount"></span></h2>
+<p class="shelf-lead">
+  あの音を出していたのは、どんな楽器だったのか。分かっていることと、分かっていないことを分けて並べています。
+  「不明」も隠さず載せます。演奏映像が見つかれば、写真の代わりに置いていきます。
+</p>
+<div id="players"></div>
 
 <h2>あなたの一本を載せませんか</h2>
 <div class="call">
@@ -171,6 +208,117 @@ const BASSES = [
   },
 
 ];
+
+/* 名手の楽器。1人＝1オブジェクト。
+   この棚のこだわり：実物（楽器そのもの・弾いている姿）を写真か動画で見られること／外国語のインタビューを日本語で読めること
+   sure : 楽器の確度。"sure" 確定（本人の発言・所蔵記録）/ "maybe" 諸説 / "video" 映像で種別だけ確認 / 省略で「不明」
+   own  : 本人の所有か。"own" 本人所有（出典あり）/ "borrowed" 借りていた / "mixed" 所有と借用の両方 / 省略で「未確認」
+          ツアーでは借り物が多いので、出典で言えないかぎり「未確認」のままにする
+   video: YouTubeの動画ID。vstart で再生開始の秒数（埋め込みは公式機能。写真は権利の都合で載せない）
+   vnote: 動画の説明。映っている楽器が上の一本だと言えないときは、そう書く
+   audio: true なら演奏映像ではなく音源
+   more : 追加の動画 [[ID, 説明, 開始秒], ...]
+   ja   : 記事から分かる事実を自分の言葉で＋短い訳の引用（「」）。全文の起こし・訳は公開せず archive/ に置く。[[本文, 出典名, URL], ...] */
+const PLAYERS = [
+  // ── ジャズ
+  { group:"ジャズ", name:"Scott LaFaro", sure:"sure", own:"own",
+    inst:"Abraham Prescott, 1825年, アメリカ・ニューハンプシャー州コンコード。1958年に前の楽器（ミッテンヴァルト製）が盗まれて手に入れた。61年の事故で大破し、のちに修復。いまは国際ベース協会（ISB）の所有",
+    video:"6ftvARLrFKE", vnote:"Prescottを弾くLaFaro。楽器を修復したKolstein家の公式チャンネル",
+    more:[["I5-PgCFlx1k","楽器そのもの。修復したBarrie Kolsteinが、その一本を手に語る"]],
+    ja:[["ビル・エヴァンスは、LaFaroが楽器を横に寝かせても音が長く鳴り続けた、と回想している。なで肩が強くハイポジションに入りやすい形で、裏板の継ぎ目に黒檀の象嵌がある。","NJPAC","https://www.njpac.org/press/view-from-box-b-scott-lafaros-legacy/"],
+        ["製作年は1825年が通説だが、1801年頃とする雑誌記事（Bass World誌・1988年）もある。","organissimo（同誌の引用）","https://www.organissimo.org/forum/topic/29070-charles-mingus-bass"]],
+    src:[["Wikipedia","https://en.wikipedia.org/wiki/Scott_LaFaro"],["The Strad（写真あり）","https://www.thestrad.com/news/scott-lafaros-1800s-double-bass-loaned-to-new-jersey-performing-arts-center/20410.article"]] },
+
+  { group:"ジャズ", name:"Ron Carter", sure:"sure", own:"own",
+    inst:"Juzek, 1910年, プラハ。1959年に中古で買い、それからずっと（本人の発言）",
+    strings:"La Bella 7710（本人と共同開発したテープ巻き。N表記とT表記の両方がある）",
+    video:"zjYM76FPS3w", vnote:"1964年、マイルス・デイヴィス・クインテット。買った5年後なので同じ一本の可能性が高いが、未確認",
+    more:[["piBJE9WutI0","本人の公式チャンネル。ベースを買うときに何を確かめるか（英語）"]],
+    ja:[["1959年に中古のJuzekを買って以来、それ一本。ピックアップはDavid GageのLifelineで、マイクは使わない。アンプは大きい会場でEpifani、小さい部屋でGallien-Krueger。Epifaniを選ぶ理由を、本人は「自分の音のまま鳴る」と話している。","No Treble（2025年）","https://www.notreble.com/buzz/2025/08/03/ron-carter-talks-double-bass-gear-and-legacy-in-this-exclusive-interview/"]],
+    src:[["Discover Double Bass","https://discoverdoublebass.com/interview/gear-jazz-double-bass"]] },
+
+  { group:"ジャズ", name:"Ray Brown", sure:"maybe", own:"own",
+    inst:"エラ・フィッツジェラルドから贈られた一本。製作者はアマティ説・イタリア説・英国説で割れている。亡くなったとき3本持っていた",
+    video:"C0UXa-8p2xM", vnote:"1964年ロンドン、オスカー・ピーターソン・トリオ（BBC Jazz 625）。映っている楽器が贈られた一本かは未確認",
+    more:[["dedbSQvEVYQ","楽器そのもの。Robert HurstがホテルでRay Brownのベースを弾く（John Claytonの提供）。3本のうちどれかは未確認"]],
+    ja:[["エラから贈られた一本は、いまトロントの奏者の手元にある。ロンドンのRonnie Scott'sは、この一本を写したレプリカ（製作はLaurence Dixon）を店のベースにしている。","classical-music.com","https://www.classical-music.com/news/new-house-double-bass-arrives-ronnie-scotts"],
+        ["遺された楽器は、夫人の頼みでChristian McBrideとJohn Claytonが引き取った。","NPR（2015年）","https://www.npr.org/2015/11/18/456540205/christian-mcbride-on-ray-browns-bass-and-james-browns-appeal"]],
+    src:[["TalkBass","https://www.talkbass.com/threads/ray-browns-bass.168111/"]] },
+
+  { group:"ジャズ", name:"Charles Mingus", sure:"maybe", own:"own",
+    inst:"本人は「The Bass」と呼んだ一本。Ernst Heinrich Roth, 1927年, ドイツ・マルクノイキルヒェン。渦巻きがライオン（ドラゴン）の頭の彫刻で、通称「Lion's Head」。いまはMingus Big BandのBoris Kozlovが預かっている",
+    strings:"ガット弦（Golden Spiral）",
+    video:"-6tZiGdZ_DQ", vstart:2098, vnote:"楽器を預かるBoris Kozlovが「Mingusのベース」を語る章から（Discover Double Bassの公式・英語）。1968年の記録映画『Mingus』では、本人がこの楽器を「Mingus Fingers」のベースと呼んでいる",
+    more:[
+          ["-6tZiGdZ_DQ","同じインタビューの「ベースを借りること」の章から（英語）",1713],
+          ["eIN-1R4XiW0","1964年ストックホルム、エリック・ドルフィーとのセクステット。ツアー中なので借り物の可能性もある"]],
+    ja:[["2006年にBass Player誌の記者が実物を調べている。G弦が指板の端寄りに張られ、ライオンの頭は後から彫り直されたもの。ピックアップはDavid Gageで、Gageは70年代からこの楽器の手入れを続けている。","organissimo（Bass Player誌2006年8月号の転載）","https://www.organissimo.org/forum/topic/29070-charles-mingus-bass"]],
+    src:[] },
+
+  { group:"ジャズ", name:"Charlie Haden", sure:"maybe", own:"own",
+    inst:"Pöllmann, 1973年, ミッテンヴァルト（本人のために作られた、と販売店）。Vuillaume説も",
+    video:"xdrQpEYmhoQ", vnote:"1970年ドイツ、キース・ジャレット・トリオ。Pöllmann（1973年）より前なので別の楽器",
+    more:[["dFXM22_jMdg","本人が自分のベースについて語る18分（2025年に公式で出た音源・英語）。中身の要約はこれから"]],
+    src:[["Upton Bass","https://uptonbass.com/product/sold-pollmann-double-bass-4-4-size-1973-mittenwald-germany-ex-charlie-haden"]] },
+
+  { group:"ジャズ", name:"Dave Holland", sure:"maybe", own:"own",
+    inst:"Ernst Reinhold Schmidt, 1920年頃, ザクセン。80〜90年代のメインで、ソロ作『Ones All』の楽器（販売店）。いまの楽器は不明。公式サイトにも記載なし",
+    video:"DkUSBCrMqts", vnote:"2003年、ドイツのJazzBalticaでのソロ・コンサート全編。楽器がSchmidtかは未確認",
+    src:[["Upton Bass","https://uptonbass.com/oldsite/shop/reinholdt-schmidt-double-bass-dave-holland/"]] },
+
+  { group:"ジャズ", name:"Christian McBride", sure:"maybe", own:"own",
+    inst:"Benedict Puglisi。2017年のISB大会でも弾いていた。姉妹器をLarry Grenadierが持つ。Ray Brownが遺した楽器も引き取っている。公式サイトに楽器の記載なし",
+    video:"werO5PL3mqU", vnote:"ポッドキャスト「Contrabass Conversations」の本人回（英語）",
+    src:[["NPR（2015年）","https://www.npr.org/2015/11/18/456540205/christian-mcbride-on-ray-browns-bass-and-james-browns-appeal"]] },
+
+  { group:"ジャズ", name:"Paul Chambers",
+    video:"8G9mEwdp8Vs", vnote:"1960年、JATPのコルトレーン、ウィントン・ケリー、ジミー・コブとの演奏。楽器を見る手がかりはここから",
+    src:[] },
+
+  { group:"ジャズ", name:"Jimmy Blanton", sure:"maybe", own:"own",
+    inst:"製作者は不明。亡くなったあと、親族（いとこ、または甥）のWendell Marshallが受け継ぎ、生涯大事にした。その後はウィスコンシン大学が所有し、学生が弾くこともあるという",
+    video:"jCzIMJqNVFs", audio:true, vnote:"演奏映像は見つからず。1940年「Jack the Bear」の音源と写真",
+    src:[["Wikipedia（Wendell Marshall）","https://en.wikipedia.org/wiki/Wendell_Marshall"],["TalkBass（NYT記事の引用）","https://www.talkbass.com/threads/jimmy-blantons-bass.161172/"]] },
+
+  // ── キューバ・サルサ
+  { group:"キューバ・サルサ", name:"Andy González", sure:"sure", own:"own",
+    inst:"Ampeg Baby Bass とアコースティックの両方",
+    video:"bW4mbyN383Q", vnote:"1998年、Conjunto Libreのリズム隊。この映像ではアコースティック",
+    ja:[["Baby Bassには、オーケストラのソロ用ゲージの弦を全音下げて張っていた。自分のアコースティックには、Cachaoが録音で弾いたときのベルトのバックルの跡が残っている。","Brooklyn Rail（2008年）","https://brooklynrail.org/2008/03/music/bass-rules-israel-cachao-lopez-and-andy-gonzalez"]],
+    src:[["Wikipedia（Grove引用）","https://en.wikipedia.org/wiki/Andy_Gonz%C3%A1lez_(musician)"]] },
+
+  { group:"キューバ・サルサ", name:"Israel “Cachao” López", sure:"maybe", own:"mixed",
+    inst:"主にアコースティック。録音では借りた楽器で弾くことが多かった。80年代のSalsoul盤ではAndy Gonzálezのアコースティックを弾いた。もう1本はBaby Bass（共演者の証言）。弦はガット系",
+    video:"TRz4nwm1K-8", vnote:"1993年のドキュメンタリー『Como su ritmo no hay dos』。この時期は借りた楽器の可能性がある",
+    more:[["C-_q1Zgnt4E","90年代のインタビュー全編。リズムの実演つき（スペイン語）"]],
+    ja:[["録音では借りたベースで弾くことが多かった、とAndy Gonzálezは聞いている。Andyの見立ては「楽器より弾き手」。","Brooklyn Rail（2008年）","https://brooklynrail.org/2008/03/music/bass-rules-israel-cachao-lopez-and-andy-gonzalez"],
+        ["晩年も自分の楽器が要修理で、地元の仕事でも借りていた（共演者の証言）。","TalkBass","https://www.talkbass.com/threads/cachao-and-cachaito.564987/"]],
+    src:[] },
+
+  { group:"キューバ・サルサ", name:"Orlando “Cachaíto” López", sure:"video",
+    inst:"ダブルベース。製作者は不明",
+    video:"kK_OTjYUXsg", vnote:"2002年、BBC Radio 3の授賞式でのライブ（World Circuitの公式）。授賞式なので会場の楽器の可能性もある",
+    more:[["WhoJFpD6Zoc","ベースとの出会いを本人が語る（World Circuitの公式・スペイン語）"]],
+    src:[["Wikipedia","https://en.wikipedia.org/wiki/Orlando_%22Cacha%C3%ADto%22_L%C3%B3pez"]] },
+
+  { group:"キューバ・サルサ", name:"Oscar D'León", sure:"video",
+    inst:"80年代の「Mi bajo y yo」の映像ではウッドベース（弓も使う）。製作者は不明",
+    video:"Ug1-Bn-O0F0", vnote:"80年代のテレビ出演とみられる映像",
+    src:[] },
+
+  { group:"キューバ・サルサ", name:"Bobby Valentín", sure:"video",
+    inst:"近年の映像ではエレキベース。1970年ごろトランペットからベースに移った「Rey del Bajo（ベースの王）」",
+    video:"tRga3yDqJjg", vnote:"「Sesiones Desde La Loma」でのスタジオ・ライブ。自分のバンドなので本人の楽器の可能性が高いが、未確認",
+    more:[["6Ik42_dj_0s","大学のテレビ番組での長いインタビュー「El Doctor del bajo」（スペイン語・81分）"]],
+    src:[["Fania","https://fania.com/artist-essentials/bobby-valentin/"]] },
+
+  { group:"キューバ・サルサ", name:"Carlos del Puerto", sure:"video",
+    inst:"チューチョ・バルデスとの映像ではアコースティック。Irakereの創設メンバーで、キューバの音楽教育にエレキの奏法も持ち込んだ人とされる。製作者は不明",
+    video:"I6eWmY-pPdc", vnote:"チューチョ・バルデスとの演奏。息子のCarlitos del Puertoのチャンネル",
+    more:[["XkJIcDW7zh4","1994年、コロンビア・カリでの公開レッスン（スペイン語）"]],
+    src:[["Markbass","https://markbass.it/artist/carlos-dl-puerto/"]] },
+];
+
 /* ============================================================
    ここから下は触らなくてよい
    ============================================================ */
@@ -211,6 +359,41 @@ document.getElementById("list").innerHTML = BASSES.map((b, i) => {
       <div class="who">${esc(b.owner || "")}</div>
       ${b.note ? `<p class="note">${esc(b.note)}</p>` : ""}
       ${spec ? `<dl class="spec">${spec}</dl>` : ""}
+    </div>
+  </article>`;
+}).join("");
+
+/* 名手の楽器 */
+const OWN = { own:"本人の所有", borrowed:"借りていた", mixed:"所有と借用の両方" };
+const SURE = { sure:["確定","sure"], maybe:["諸説","maybe"], video:["映像で確認","video"] };
+document.getElementById("pcount").textContent = PLAYERS.length + " 人";
+let lastGroup = "";
+document.getElementById("players").innerHTML = PLAYERS.map(p => {
+  const head = p.group !== lastGroup ? `<div class="group">${esc(p.group)}</div>` : "";
+  lastGroup = p.group;
+  const [label, cls] = SURE[p.sure] || ["不明", ""];
+  const video = p.video
+    ? `<div class="video"><iframe src="https://www.youtube-nocookie.com/embed/${esc(p.video)}${p.vstart ? `?start=${+p.vstart}` : ""}" title="${esc(p.name)}" loading="lazy" allowfullscreen></iframe></div>`
+    : "";
+  const vnote = p.video && (p.vnote || p.audio)
+    ? `<p class="vnote">${p.audio ? `<span class="tag">音源のみ</span>` : ""}${esc(p.vnote || "")}</p>` : "";
+  const more = (p.more || []).map(([id, n, t]) =>
+    `<div class="video"><iframe src="https://www.youtube-nocookie.com/embed/${esc(id)}${t ? `?start=${+t}` : ""}" title="${esc(p.name)}" loading="lazy" allowfullscreen></iframe></div><p class="vnote">${esc(n)}</p>`).join("");
+  const ja = (p.ja || []).map(([t, n, u]) =>
+    `<p>${esc(t)}<span class="by">— <a href="${esc(u)}" target="_blank" rel="noopener">${esc(n)}</a></span></p>`).join("");
+  const own = OWN[p.own] || "未確認";
+  const src = (p.src || []).map(([t, u]) => `<a href="${esc(u)}" target="_blank" rel="noopener">${esc(t)}</a>`).join("");
+  return `${head}<article class="player">
+    ${video}
+    ${vnote}
+    ${more ? `<div class="more">${more}</div>` : ""}
+    <div class="body">
+      <span class="badge ${cls}">${label}</span>
+      <h3>${esc(p.name)}</h3>
+      <p class="inst ${p.inst ? "" : "unknown"}">${esc(p.inst || "楽器はまだ分かっていません。")}</p>
+      <dl class="spec"><dt>所有</dt><dd>${own}</dd>${p.strings ? `<dt>弦</dt><dd>${esc(p.strings)}</dd>` : ""}</dl>
+      ${ja ? `<div class="ja"><div class="ja-h">記事から（要点と短い引用・訳は当サイト）</div>${ja}</div>` : ""}
+      ${src ? `<div class="src">出典：${src}</div>` : ""}
     </div>
   </article>`;
 }).join("");
